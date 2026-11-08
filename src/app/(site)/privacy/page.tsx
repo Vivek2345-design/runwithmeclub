@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { Legal } from "@/components/Legal";
 import { BRAND, CONTACT_EMAIL } from "@/lib/brand";
+import { env } from "@/lib/env";
 
 export const metadata: Metadata = { title: "Privacy policy", alternates: { canonical: "/privacy" } };
+export const dynamic = "force-dynamic";
 
 // TEMPLATE: have a lawyer review this before launch (India's DPDP Act 2023 applies to personal and health-related data).
 export default function PrivacyPage() {
@@ -15,7 +17,7 @@ export default function PrivacyPage() {
         <li><b>Training data:</b> runs you log, upload or import, including date, distance, time, elevation and heart-rate or power summaries. If you upload a GPX file we keep only the summary, not the route points.</li>
         <li><b>Club activity:</b> event registrations and attendance, challenge results, goals and workouts assigned to you.</li>
         <li><b>Messages:</b> anything you send us through the contact form.</li>
-        <li><b>Strava (optional):</b> if you connect Strava, we receive your activities with your permission. Access tokens are stored encrypted. You can disconnect at any time.</li>
+        <li><b>Strava{env.requireStrava ? " (required for members)" : " (optional)"}:</b> {env.requireStrava ? "members connect Strava, and we receive their activities with their permission (read-only access). " : "if you connect Strava, we receive your activities with your permission. "}Access tokens are stored encrypted. You can revoke access at any time in your Strava settings, and we then delete the Strava activities we imported.</li>
       </ul>
       <h2>How we use it</h2>
       <p>To run the club: show you your progress, organise events, coach you, and display the leaderboard. We do not sell your data and we do not show ads.</p>

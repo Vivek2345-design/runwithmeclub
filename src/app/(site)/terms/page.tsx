@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { Legal } from "@/components/Legal";
 import { BRAND, CONTACT_EMAIL } from "@/lib/brand";
+import { env } from "@/lib/env";
 
 export const metadata: Metadata = { title: "Terms of use", alternates: { canonical: "/terms" } };
+export const dynamic = "force-dynamic";
 
 // TEMPLATE: have a lawyer review this before launch, especially the participation-risk section.
 export default function TermsPage() {
@@ -11,6 +13,7 @@ export default function TermsPage() {
       <p>By creating an account or taking part in {BRAND} activities you agree to these terms.</p>
       <h2>Your account</h2>
       <p>Provide accurate information, keep your password safe, and tell us if you think your account has been misused. You must be at least 16 to create an account; under-18s need a parent or guardian&rsquo;s consent to take part in events.</p>
+      {env.requireStrava && (<><h2>Strava</h2><p>Members connect a Strava account so that runs, leaderboards and challenges are accurate. If you revoke Strava access, member features are paused until you reconnect.</p></>)}
       <h2>Health and participation risk</h2>
       <p>Running and exercise carry an inherent risk of injury. You take part at your own risk, should be in good health, and should check with a doctor if you are unsure. Training plans and metrics such as fitness, fatigue and form are general guidance, not medical advice.</p>
       <h2>Events</h2>

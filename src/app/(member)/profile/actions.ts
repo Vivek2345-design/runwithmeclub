@@ -6,7 +6,9 @@ import { z } from "zod";
 import { hashPassword, rateLimited, verifyPassword } from "@/lib/auth";
 import { decrypt } from "@/lib/crypto";
 import { db } from "@/lib/db";
+import { env } from "@/lib/env";
 import { destroySession, requireUser } from "@/lib/session";
+import { needsStravaConnection } from "@/lib/strava-gate";
 import { recomputeLoads } from "@/lib/sync";
 
 const opt = (max: number) => z.string().trim().max(max).optional().transform((v) => v || null);
@@ -51,6 +53,8 @@ export async function changePassword(formData: FormData) {
 
 export async function disconnectStrava() {
   const user = await requireUser("/profile");
+  // A member who disconnects would be locked out of the member area, so it isn't allowed while Strava is mandatory.
+  if (needsStravaConnection({ role: user.role, stravaId: null }, env.requireStrava)) redirect("/profile?error=strava_required");
   if (user.stravaAccessToken && user.stravaTokenExpiresAt && user.stravaTokenExpiresAt > new Date()) {
     try {
       await fetch("https://www.strava.com/oauth/deauthorize", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: new URLSearchParams({ access_token: decrypt(user.stravaAccessToken) }) });

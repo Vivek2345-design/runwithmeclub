@@ -4,6 +4,7 @@ import { Avatar, Badge, Field, Flash, PageHeader } from "@/components/ui";
 import { PLANS, type PlanKey } from "@/lib/brand";
 import { env } from "@/lib/env";
 import { fmtDate } from "@/lib/format";
+import { needsStravaConnection } from "@/lib/strava-gate";
 import { requireUser } from "@/lib/session";
 import { changePassword, deleteAccount, disconnectStrava, updateProfile, updateTraining } from "./actions";
 
@@ -15,6 +16,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
   const sp = await searchParams;
   const plan = PLANS[(user.plan as PlanKey) in PLANS ? (user.plan as PlanKey) : "FREE"];
   const stravaMsg = sp.strava;
+  const stravaRequired = needsStravaConnection({ role: user.role, stravaId: null }, env.requireStrava);
 
   return (
     <>
@@ -58,18 +60,18 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
           </section>
 
           <section className="card">
-            <div className="flex items-center justify-between"><h2 className="font-bold">Strava</h2>{user.stravaId ? <Badge tone="badge-good">Connected</Badge> : <Badge>Optional</Badge>}</div>
+            <div className="flex items-center justify-between"><h2 className="font-bold">Strava</h2>{user.stravaId ? <Badge tone="badge-good">Connected</Badge> : <Badge tone={stravaRequired ? "badge-warn" : ""}>{stravaRequired ? "Required" : "Optional"}</Badge>}</div>
             {user.stravaId ? (
               <>
                 <p className="mt-2 text-sm text-muted">Your Strava activities are imported automatically. {user.lastSyncAt ? `Last synced ${fmtDate(user.lastSyncAt)}.` : "Waiting for the first sync."}{user.syncStatus === "RATE_LIMITED" && " Strava's rate limit was hit; the next sync will continue."}{user.syncStatus === "ERROR" && " The last sync failed; try again shortly."}</p>
                 <div className="mt-4 flex gap-2">
                   <form action="/api/strava/sync" method="post"><SubmitButton className="btn btn-sm" pendingText="Syncing…">Sync now</SubmitButton></form>
-                  <form action={disconnectStrava}><ConfirmButton message="Disconnect Strava? Activities already imported stay in your log.">Disconnect</ConfirmButton></form>
+                  {stravaRequired ? <p className="self-center text-xs text-muted">Strava is required for club members.</p> : <form action={disconnectStrava}><ConfirmButton message="Disconnect Strava? Activities already imported stay in your log.">Disconnect</ConfirmButton></form>}
                 </div>
               </>
             ) : (
               <>
-                <p className="mt-2 text-sm text-muted">Link Strava to import your runs automatically. You can use the club fully without it.</p>
+                <p className="mt-2 text-sm text-muted">Link Strava to import your runs automatically. {stravaRequired ? "It is required for club members." : "You can use the club fully without it."}</p>
                 {env.stravaConfigured ? <a className="btn btn-primary btn-sm mt-4" href="/api/strava/connect">Connect Strava</a> : <p className="mt-3 rounded-lg bg-surface-2 px-3 py-2 text-xs text-muted">Strava isn&rsquo;t set up on this site yet. Log runs manually or upload GPX files in the meantime.</p>}
               </>
             )}

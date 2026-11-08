@@ -6,7 +6,7 @@ import { EmptyState, Flash, PageHeader } from "@/components/ui";
 import { db } from "@/lib/db";
 import { fmtDateLong, fmtTime } from "@/lib/format";
 import { requireUser } from "@/lib/session";
-import { cancelRsvp } from "../../(site)/events/actions";
+import { cancelRsvp } from "../../../(site)/events/actions";
 
 export const metadata: Metadata = { title: "My events" };
 export const dynamic = "force-dynamic";

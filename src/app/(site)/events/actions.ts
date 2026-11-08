@@ -5,7 +5,9 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { cancelRegistration, register } from "@/lib/events";
+import { env } from "@/lib/env";
 import { eventEmail } from "@/lib/notify";
+import { needsStravaConnection } from "@/lib/strava-gate";
 import { requireUser } from "@/lib/session";
 
 async function slugFor(eventId: string) {
@@ -15,6 +17,7 @@ async function slugFor(eventId: string) {
 export async function rsvp(eventId: string, from: string) {
   const slug = await slugFor(eventId);
   const user = await requireUser(slug ? `/events/${slug}` : "/events");
+  if (needsStravaConnection(user, env.requireStrava)) redirect("/connect-strava");
   const result = await register(eventId, user.id);
   if (result === "going" || result === "waitlist") void eventEmail(user.id, eventId, result);
   revalidatePath("/events");

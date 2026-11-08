@@ -99,6 +99,8 @@ const MESSAGES: Record<string, string> = {
   already_linked: "That Strava account is linked to another member.",
   error: "Something went wrong. Please try again.",
   disconnected: "Strava disconnected.",
+  strava_required: "Strava is required for club members, so it can't be disconnected. Contact the club if you need help.",
+  strava_first: "Please connect Strava first. It's required to use the member area.",
   invalid_credentials: "That email and password don't match. Please try again.",
   email_taken: "An account with that email already exists. Try logging in instead.",
   weak_password: "Please use a password of at least 8 characters.",

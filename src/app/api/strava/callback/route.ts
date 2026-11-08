@@ -40,7 +40,7 @@ export async function GET(req: NextRequest) {
     },
   });
   void syncUser(user.id);
-  const res = back("connected");
+  const res = env.requireStrava ? NextResponse.redirect(`${env.appUrl}/dashboard?ok=connected`) : back("connected");
   res.cookies.delete("oauth_state");
   return res;
 }

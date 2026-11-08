@@ -2,16 +2,18 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Field, Flash } from "@/components/ui";
 import { SubmitButton } from "@/components/client";
+import { env } from "@/lib/env";
 import { signup } from "../actions";
 
 export const metadata: Metadata = { title: "Join the club", robots: { index: false } };
+export const dynamic = "force-dynamic";
 
 export default async function SignupPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
   const sp = await searchParams;
   return (
     <>
       <h1 className="text-3xl font-extrabold">Join RunWithMeClub</h1>
-      <p className="mb-6 mt-1 text-sm text-muted">Free to join. Takes under a minute.</p>
+      <p className="mb-6 mt-1 text-sm text-muted">Free to join. Takes under a minute.{env.requireStrava && " You'll connect your Strava account right after signing up."}</p>
       <Flash error={sp.error} />
       <form action={signup} className="space-y-4">
         <Field label="Full name" htmlFor="name"><input id="name" name="name" className="input" required minLength={2} maxLength={80} autoComplete="name" autoFocus /></Field>
