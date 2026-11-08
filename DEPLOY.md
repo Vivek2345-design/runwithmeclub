@@ -66,7 +66,7 @@ The app refuses to start with a missing/weak `SESSION_SECRET`, a non-https `APP_
 
 ## 6. First deploy and first admin [you]
 
-1. Railway redeploys when variables change. Watch **Deployments**; it runs the database migrations automatically, then checks `/api/health`.
+1. Railway redeploys when variables change. Watch **Deployments**; the app applies any pending database migrations each time it starts, and `/api/health` only reports ok once the tables exist.
 2. Open `https://runwithme.club`. The database is empty (no demo data).
 3. **Immediately** go to `/signup` and create your own account. **The first account on an empty database becomes the admin.** Do this before you share the link with anyone.
 4. Log in, open `/admin`, and add your real pace groups, events and a welcome announcement. Invite a teammate: they sign up normally, then you open Admin -> Members and make them a Coach (or Admin).
@@ -92,7 +92,7 @@ pg_dump "$DATABASE_PUBLIC_URL" --no-owner -f runwithmeclub-backup-$(date +%F).sq
 
 ## 9. Updating the site later
 
-Change the code, then `git push`. Railway rebuilds, runs migrations (`prisma migrate deploy`) and swaps in the new version. If a deploy breaks something, use **Deployments -> Rollback** (database migrations are forward-only, so keep schema changes backwards compatible).
+Change the code, then `git push`. Railway rebuilds, the new version applies pending migrations (`prisma migrate deploy`) as it starts, and then goes live. If a deploy breaks something, use **Deployments -> Rollback** (database migrations are forward-only, so keep schema changes backwards compatible).
 
 ## 10. Turning on Strava later (optional)
 
