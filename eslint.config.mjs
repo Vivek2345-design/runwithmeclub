@@ -1,25 +1,18 @@
-import { dirname } from "path";
-import { fileURLToPath } from "url";
-import { FlatCompat } from "@eslint/eslintrc";
+import nextVitals from "eslint-config-next/core-web-vitals";
+import nextTs from "eslint-config-next/typescript";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-});
-
-const eslintConfig = [
-  ...compat.extends("next/core-web-vitals", "next/typescript"),
+const config = [
+  ...nextVitals,
+  ...nextTs,
+  { ignores: [".next/**", "node_modules/**", "next-env.d.ts"] },
   {
-    ignores: [
-      "node_modules/**",
-      ".next/**",
-      "out/**",
-      "build/**",
-      "next-env.d.ts",
-    ],
+    rules: { "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_" }] },
+  },
+  {
+    // Async server components render once per request, so reading the clock there is intended.
+    files: ["src/app/**/page.tsx", "src/app/**/layout.tsx"],
+    rules: { "react-hooks/purity": "off" },
   },
 ];
 
-export default eslintConfig;
+export default config;

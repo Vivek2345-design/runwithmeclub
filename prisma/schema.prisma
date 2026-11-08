@@ -1,0 +1,204 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// role:   MEMBER | COACH | ADMIN        (COACH and ADMIN can open the admin area; only ADMIN can change roles or delete)
+// status: ACTIVE | SUSPENDED
+// plan:   FREE | MEMBER | ELITE
+model User {
+  id               String    @id @default(cuid())
+  email            String    @unique
+  passwordHash     String?
+  name             String
+  role             String    @default("MEMBER")
+  status           String    @default("ACTIVE")
+  plan             String    @default("FREE")
+  membershipUntil  DateTime?
+  phone            String?
+  city             String?
+  bio              String?
+  emergencyContact String?
+  adminNotes       String?
+  groupId          String?
+  group            Group?    @relation(fields: [groupId], references: [id], onDelete: SetNull)
+  maxHr            Int?
+  restHr           Int?
+  ftp              Int?
+
+  // Optional Strava connection (members can link it later in their profile)
+  stravaId             Int?      @unique
+  stravaAccessToken    String?
+  stravaRefreshToken   String?
+  stravaTokenExpiresAt DateTime?
+  lastSyncAt           DateTime?
+  syncStatus           String    @default("IDLE")
+
+  createdAt   DateTime @default(now())
+  lastLoginAt DateTime?
+
+  activities    Activity[]
+  registrations Registration[]
+  workouts      Workout[]      @relation("AssignedWorkouts")
+  authored      Workout[]      @relation("AuthoredWorkouts")
+  goals         Goal[]
+  announcements Announcement[]
+  events        Event[]
+  resetTokens   PasswordResetToken[]
+}
+
+model Group {
+  id          String  @id @default(cuid())
+  name        String  @unique
+  description String?
+  paceLabel   String?
+  color       String  @default("#F2541B")
+  members     User[]
+}
+
+// source: MANUAL | GPX | STRAVA
+model Activity {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  source        String   @default("MANUAL")
+  stravaId      Int?     @unique
+  name          String
+  sportType     String
+  startDate     DateTime
+  distance      Float
+  movingTime    Int
+  elapsedTime   Int
+  elevationGain Float    @default(0)
+  avgHr         Float?
+  maxHr         Float?
+  avgWatts      Float?
+  weightedWatts Float?
+  load          Float    @default(0)
+  notes         String?
+  createdAt     DateTime @default(now())
+
+  @@index([userId, startDate])
+  @@index([startDate])
+}
+
+// type:   GROUP_RUN | RACE | WORKSHOP | SOCIAL
+// status: DRAFT | PUBLISHED | CANCELLED
+model Event {
+  id            String   @id @default(cuid())
+  slug          String   @unique
+  title         String
+  description   String
+  type          String   @default("GROUP_RUN")
+  status        String   @default("PUBLISHED")
+  startsAt      DateTime
+  endsAt        DateTime?
+  location      String
+  distanceKm    Float?
+  capacity      Int?
+  priceInr      Int      @default(0)
+  hue           Int      @default(18)
+  createdById   String?
+  createdBy     User?    @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt     DateTime @default(now())
+
+  registrations Registration[]
+
+  @@index([startsAt])
+}
+
+// status: GOING | WAITLIST | CANCELLED
+model Registration {
+  id          String    @id @default(cuid())
+  eventId     String
+  userId      String
+  event       Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status      String    @default("GOING")
+  checkedInAt DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@unique([eventId, userId])
+}
+
+model Announcement {
+  id        String   @id @default(cuid())
+  title     String
+  body      String
+  pinned    Boolean  @default(false)
+  isPublic  Boolean  @default(false)
+  authorId  String?
+  author    User?    @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  createdAt DateTime @default(now())
+}
+
+// metric: DISTANCE | ELEVATION | ACTIVITIES | TIME   (everyone active is automatically included)
+model Challenge {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  metric      String   @default("DISTANCE")
+  startDate   DateTime
+  endDate     DateTime
+  clubTarget  Float?
+  createdAt   DateTime @default(now())
+}
+
+// status: PLANNED | DONE | SKIPPED
+model Workout {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation("AssignedWorkouts", fields: [userId], references: [id], onDelete: Cascade)
+  authorId        String?
+  author          User?    @relation("AuthoredWorkouts", fields: [authorId], references: [id], onDelete: SetNull)
+  date            DateTime
+  title           String
+  sportType       String   @default("Run")
+  description     String?
+  plannedDistance Float?
+  plannedMinutes  Int?
+  status          String   @default("PLANNED")
+  createdAt       DateTime @default(now())
+
+  @@index([userId, date])
+}
+
+// month = 0 means a whole-year goal
+model Goal {
+  id       String @id @default(cuid())
+  userId   String
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  year     Int
+  month    Int    @default(0)
+  targetKm Float
+
+  @@unique([userId, year, month])
+}
+
+// status: NEW | READ | ARCHIVED
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  subject   String
+  body      String
+  status    String   @default("NEW")
+  createdAt DateTime @default(now())
+}
+
+// One-time password reset links. Only a hash of the token is stored.
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+}
