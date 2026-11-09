@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { hashPassword, rateLimited, verifyPassword } from "@/lib/auth";
+import { fields } from "@/lib/member-fields";
 import { decrypt } from "@/lib/crypto";
 import { db } from "@/lib/db";
 import { env } from "@/lib/env";
@@ -13,13 +14,27 @@ import { recomputeLoads } from "@/lib/sync";
 
 const opt = (max: number) => z.string().trim().max(max).optional().transform((v) => v || null);
 
-const profileSchema = z.object({ name: z.string().trim().min(2).max(80), phone: opt(20), city: opt(60), bio: opt(500), emergencyContact: opt(120) });
+// Legacy members may have blanks; when a value is given it must be valid.
+const blankOk = <T extends z.ZodType>(schema: T) => z.preprocess((v) => (typeof v === "string" && v.trim() === "" ? undefined : v), schema.optional());
+
+const profileSchema = z.object({
+  name: z.string().trim().min(2).max(80),
+  phone: blankOk(fields.phone),
+  address: blankOk(fields.address),
+  city: blankOk(fields.city),
+  state: blankOk(fields.state),
+  pincode: blankOk(fields.pincode),
+  tshirtSize: blankOk(fields.tshirtSize),
+  bio: opt(500),
+  emergencyContact: opt(120),
+});
 
 export async function updateProfile(formData: FormData) {
   const user = await requireUser("/profile");
   const p = profileSchema.safeParse(Object.fromEntries(formData));
   if (!p.success) redirect("/profile?error=invalid");
-  await db.user.update({ where: { id: user.id }, data: p.data });
+  const d = p.data;
+  await db.user.update({ where: { id: user.id }, data: { ...d, phone: d.phone ?? null, address: d.address ?? null, city: d.city ?? null, state: d.state ?? null, pincode: d.pincode ?? null, tshirtSize: d.tshirtSize ?? null } });
   revalidatePath("/", "layout");
   redirect("/profile?ok=saved");
 }

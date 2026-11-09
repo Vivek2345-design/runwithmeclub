@@ -101,11 +101,17 @@ Change the code, then `git push`. Railway rebuilds, the new version applies pend
 3. Add `STRAVA_CLIENT_ID`, `STRAVA_CLIENT_SECRET` and a random `STRAVA_WEBHOOK_VERIFY_TOKEN` in Railway.
 4. Register the webhook once: `node --env-file=.env scripts/strava-webhook.mjs create` (with those values and `APP_URL=https://runwithme.club` in your local `.env`).
 
-## Making Strava mandatory for members
+## Strava is mandatory for members (on by default)
 
-Set `REQUIRE_STRAVA` to `true` in Railway. Then every signed-in **member** is sent to a "Connect with Strava" page until they connect, and RSVPs are blocked until then. Admins and coaches are exempt. It only takes effect when `STRAVA_CLIENT_ID` and `STRAVA_CLIENT_SECRET` are set, so a missing key can't lock everyone out.
+Once `STRAVA_CLIENT_ID` and `STRAVA_CLIENT_SECRET` are set, **every member must connect Strava**. Signup ends by sending the new member straight to Strava; until they connect, member pages and event registration redirect to a "Connect with Strava" page. Profile and the public pages stay available, admins and coaches are exempt, and members can't disconnect. With no Strava keys the requirement is off, so a missing key can never lock everyone out.
 
-**Do not turn it on until Strava has approved your app for more athletes.** A new Strava app is capped at a very small number of athletes (often just you); with the switch on, every other member would be unable to connect and therefore unable to use the member area. Request a higher limit in Strava's developer program first, follow their branding guidelines, then switch it on. To turn it off, set `REQUIRE_STRAVA` to `false`.
+To turn it off, set `REQUIRE_STRAVA` to `false` in Railway.
+
+**Strava caps new apps at a very small number of athletes (often just you) until they approve it.** Until then, only that many members can complete signup and use the member area. Request a higher limit in Strava's developer program and follow their branding guidelines **before** you open signups. If you need members in sooner, set `REQUIRE_STRAVA=false` until Strava approves.
+
+## Signup collects member details
+
+Signup asks for name, email, password, date of birth (minimum age 16), contact number, T-shirt size, complete address, city, state and pincode. Members can edit everything except date of birth in Profile; admins see all of it in Members and in the CSV exports (the event attendee CSV includes T-shirt size for kit planning). Accounts created before this change have these fields blank until the member fills them in.
 
 ## Costs (approximate, check current pricing)
 

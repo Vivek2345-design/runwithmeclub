@@ -10,7 +10,7 @@ export default async function AuthLayout({ children }: { children: React.ReactNo
     <div className="grid min-h-screen lg:grid-cols-2">
       <div className="flex flex-col px-5 py-6 sm:px-10">
         <div className="flex items-center justify-between"><Link href="/"><Logo /></Link><ThemeToggle /></div>
-        <main id="main" className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center py-10">{children}</main>
+        <main id="main" className="mx-auto flex w-full max-w-lg flex-1 flex-col justify-center py-10">{children}</main>
         <p className="text-center text-xs text-muted">&copy; {new Date().getFullYear()} RunWithMeClub</p>
       </div>
       <aside className="relative hidden overflow-hidden lg:block" style={{ background: "linear-gradient(150deg, #f2541b 0%, #b8350a 55%, #0f766e 140%)" }} aria-hidden="true">

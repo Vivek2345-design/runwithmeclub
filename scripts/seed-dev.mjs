@@ -5,7 +5,7 @@
 // Login details for the demo accounts are written to .dev-credentials.txt (git-ignored).
 import { randomBytes, scryptSync } from "node:crypto";
 import { writeFileSync } from "node:fs";
-import { spawnSync } from "node:child_process";
+import { runSync } from "./bin.mjs";
 import { PrismaClient } from "@prisma/client";
 import { startLocalPostgres } from "./local-db.mjs";
 
@@ -13,7 +13,7 @@ import { startLocalPostgres } from "./local-db.mjs";
 const url = process.env.DATABASE_URL ?? "";
 if (process.env.NODE_ENV === "production" || !/@(localhost|127\.0\.0\.1)[:/]/.test(url)) throw new Error("Refusing to seed: DATABASE_URL is not a local database.");
 const pg = url.includes("localhost:54329") ? await startLocalPostgres() : { stop: async () => {} };
-const migrated = spawnSync("npx", ["prisma", "migrate", "deploy"], { stdio: "pipe", env: process.env });
+const migrated = runSync("prisma", ["migrate", "deploy"], { stdio: "pipe", env: process.env });
 if (migrated.status !== 0) { console.error(String(migrated.stderr)); await pg.stop(); process.exit(1); }
 const db = new PrismaClient();
 const args = process.argv.slice(2);
@@ -52,13 +52,17 @@ const demo = await db.user.create({ data: { name: "Aarav Sharma", email: "member
 
 const first = ["Priya", "Rohan", "Ananya", "Vikram", "Neha", "Arjun", "Kavya", "Siddharth", "Ishita", "Rahul", "Divya", "Karan", "Pooja", "Aditya", "Sneha", "Manish", "Tanvi", "Nikhil", "Riya", "Varun", "Shreya", "Harsh", "Mitali", "Kunal", "Sana", "Dev"];
 const last = ["Patel", "Nair", "Reddy", "Singh", "Mehta", "Gupta", "Rao", "Joshi", "Desai", "Kulkarni", "Menon", "Bose", "Shah", "Pillai", "Verma", "Khan", "Das", "Kapoor"];
+const STATES_SAMPLE = ["Karnataka", "Maharashtra", "Tamil Nadu", "Telangana", "Delhi", "Gujarat", "Kerala"];
+const SIZES = ["S", "M", "L", "XL"];
+const detail = (i) => ({ dateOfBirth: new Date(Date.UTC(1975 + Math.floor(between(0, 30)), Math.floor(between(0, 12)), 1 + Math.floor(between(0, 27)))), tshirtSize: SIZES[i % SIZES.length], address: `${10 + i}, Sample Street, Demo Layout (sample address)`, city: "Sample City", state: STATES_SAMPLE[i % STATES_SAMPLE.length], pincode: String(560001 + i * 7) });
+await db.user.updateMany({ where: { id: { in: [admin.id, coach.id, demo.id] } }, data: detail(1) });
 const members = [admin, coach, demo];
 for (let i = 0; i < 26; i++) {
   const name = `${first[i % first.length]} ${pick(last)}`;
   const plan = rnd() < 0.5 ? "FREE" : rnd() < 0.75 ? "MEMBER" : "ELITE";
   members.push(await db.user.create({
     data: {
-      name, email: `${name.toLowerCase().replace(/[^a-z]/g, ".")}.${i}@example.com`, passwordHash: null, plan,
+      name, email: `${name.toLowerCase().replace(/[^a-z]/g, ".")}.${i}@example.com`, passwordHash: null, plan, ...detail(i), phone: `+91 9${String(100000000 + i * 1234567).slice(0, 9)}`,
       membershipUntil: plan === "FREE" ? null : at(Math.floor(between(-5, 90)), 23, 59), groupId: pick(groups).id,
       createdAt: new Date(Date.now() - Math.floor(between(2, 120)) * DAY), lastLoginAt: new Date(Date.now() - Math.floor(between(0, 14)) * DAY),
       ...(i === 25 ? { status: "SUSPENDED" } : {}),

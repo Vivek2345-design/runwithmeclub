@@ -13,14 +13,14 @@ export default function PrivacyPage() {
       <p>This policy explains what {BRAND} collects, why, and the choices you have.</p>
       <h2>What we collect</h2>
       <ul>
-        <li><b>Account details:</b> your name, email and an encrypted password. Optionally your phone number, city, bio and an emergency contact.</li>
+        <li><b>Account and contact details:</b> your name, email, an encrypted password, date of birth, contact number, complete address (city, state and pincode) and T-shirt size. You may also add a bio and an emergency contact.</li>
         <li><b>Training data:</b> runs you log, upload or import, including date, distance, time, elevation and heart-rate or power summaries. If you upload a GPX file we keep only the summary, not the route points.</li>
         <li><b>Club activity:</b> event registrations and attendance, challenge results, goals and workouts assigned to you.</li>
         <li><b>Messages:</b> anything you send us through the contact form.</li>
         <li><b>Strava{env.requireStrava ? " (required for members)" : " (optional)"}:</b> {env.requireStrava ? "members connect Strava, and we receive their activities with their permission (read-only access). " : "if you connect Strava, we receive your activities with your permission. "}Access tokens are stored encrypted. You can revoke access at any time in your Strava settings, and we then delete the Strava activities we imported.</li>
       </ul>
       <h2>How we use it</h2>
-      <p>To run the club: show you your progress, organise events, coach you, and display the leaderboard. We do not sell your data and we do not show ads.</p>
+      <p>Date of birth is used to confirm the minimum age to join and to place runners in age categories. Contact number, address and T-shirt size are used to organise events, send club and race kits, and reach you about events or safety. To run the club: show you your progress, organise events, coach you, and display the leaderboard. We do not sell your data and we do not show ads.</p>
       <h2>Who can see it</h2>
       <ul>
         <li><b>You</b> can see all of your own data.</li>

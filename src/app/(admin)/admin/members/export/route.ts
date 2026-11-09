@@ -17,8 +17,8 @@ export async function GET(req: Request) {
     orderBy: { name: "asc" }, include: { group: true, _count: { select: { activities: true } } },
   });
   const csv = toCsv([
-    ["Name", "Email", "Phone", "City", "Role", "Status", "Plan", "Member until", "Group", "Runs logged", "Joined", "Last login"],
-    ...rows.map((u) => [u.name, u.email, u.phone, u.city, u.role, u.status, PLANS[u.plan as PlanKey]?.name ?? u.plan, u.membershipUntil?.toISOString().slice(0, 10), u.group?.name, u._count.activities, u.createdAt.toISOString().slice(0, 10), u.lastLoginAt?.toISOString().slice(0, 10)]),
+    ["Name", "Email", "Phone", "Date of birth", "T-shirt size", "Address", "City", "State", "Pincode", "Role", "Status", "Plan", "Member until", "Group", "Runs logged", "Joined", "Last login"],
+    ...rows.map((u) => [u.name, u.email, u.phone, u.dateOfBirth?.toISOString().slice(0, 10), u.tshirtSize, u.address, u.city, u.state, u.pincode, u.role, u.status, PLANS[u.plan as PlanKey]?.name ?? u.plan, u.membershipUntil?.toISOString().slice(0, 10), u.group?.name, u._count.activities, u.createdAt.toISOString().slice(0, 10), u.lastLoginAt?.toISOString().slice(0, 10)]),
   ]);
   return new Response(csv, { headers: { "Content-Type": "text/csv; charset=utf-8", "Content-Disposition": `attachment; filename="members-${new Date().toISOString().slice(0, 10)}.csv"` } });
 }

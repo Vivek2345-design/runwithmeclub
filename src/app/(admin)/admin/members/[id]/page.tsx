@@ -9,6 +9,7 @@ import { Avatar, Badge, Field, Flash, PageHeader, StatCard } from "@/components/
 import { PLANS, type PlanKey } from "@/lib/brand";
 import { db } from "@/lib/db";
 import { fmtDate, fmtDateShort, km } from "@/lib/format";
+import { ageOn } from "@/lib/member-fields";
 import { athleteOverview } from "@/lib/queries";
 import { requireStaff } from "@/lib/session";
 import { deleteMember, resetMemberPassword, updateMember } from "../../actions";
@@ -52,7 +53,7 @@ export default async function MemberPage({ params, searchParams }: { params: Pro
           <section className="card">
             <div className="mb-4 flex items-center gap-3"><Avatar name={u.name} size={48} /><div className="min-w-0 text-sm"><div className="font-bold">{u.name}</div><div className="text-xs text-muted">Joined {fmtDate(u.createdAt)}</div></div></div>
             <dl className="space-y-2 text-sm">
-              {([["Phone", u.phone], ["City", u.city], ["Emergency contact", u.emergencyContact], ["Strava", u.stravaId ? "Connected" : "Not connected"]] as const).map(([k, v]) => <div key={k} className="flex justify-between gap-3"><dt className="text-muted">{k}</dt><dd className="text-right font-medium">{v || "–"}</dd></div>)}
+              {([["Phone", u.phone], ["Date of birth", u.dateOfBirth ? `${fmtDate(u.dateOfBirth)} (${ageOn(u.dateOfBirth)})` : null], ["T-shirt", u.tshirtSize], ["Address", [u.address, u.city, u.state, u.pincode].filter(Boolean).join(", ")], ["Emergency contact", u.emergencyContact], ["Strava", u.stravaId ? "Connected" : "Not connected"]] as const).map(([k, v]) => <div key={k} className="flex justify-between gap-3"><dt className="text-muted">{k}</dt><dd className="text-right font-medium">{v || "–"}</dd></div>)}
             </dl>
             {u.bio && <p className="mt-3 border-t border-line pt-3 text-sm text-muted">{u.bio}</p>}
           </section>

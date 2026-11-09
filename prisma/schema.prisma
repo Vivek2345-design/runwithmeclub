@@ -20,7 +20,12 @@ model User {
   plan             String    @default("FREE")
   membershipUntil  DateTime?
   phone            String?
+  dateOfBirth      DateTime?
+  address          String?
   city             String?
+  state            String?
+  pincode          String?
+  tshirtSize       String?
   bio              String?
   emergencyContact String?
   adminNotes       String?

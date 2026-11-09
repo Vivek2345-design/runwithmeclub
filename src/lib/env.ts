@@ -38,10 +38,11 @@ export const env = {
     return Boolean(process.env.STRAVA_CLIENT_ID && process.env.STRAVA_CLIENT_SECRET);
   },
   /**
-   * Members must connect Strava before using the member area. Only effective when Strava is configured,
-   * so a missing key can never lock everyone out. Admins and coaches are exempt.
+   * Members must connect Strava to use the member area. ON by default as soon as Strava keys are set;
+   * set REQUIRE_STRAVA=false to turn it off. Without keys it is always off, so a missing key can never
+   * lock everyone out. Admins and coaches are exempt.
    */
   get requireStrava() {
-    return process.env.REQUIRE_STRAVA === "true" && Boolean(process.env.STRAVA_CLIENT_ID && process.env.STRAVA_CLIENT_SECRET);
+    return process.env.REQUIRE_STRAVA !== "false" && Boolean(process.env.STRAVA_CLIENT_ID && process.env.STRAVA_CLIENT_SECRET);
   },
 };

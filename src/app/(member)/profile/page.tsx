@@ -4,6 +4,7 @@ import { Avatar, Badge, Field, Flash, PageHeader } from "@/components/ui";
 import { PLANS, type PlanKey } from "@/lib/brand";
 import { env } from "@/lib/env";
 import { fmtDate } from "@/lib/format";
+import { STATES, TSHIRT_SIZES, ageOn } from "@/lib/member-fields";
 import { needsStravaConnection } from "@/lib/strava-gate";
 import { requireUser } from "@/lib/session";
 import { changePassword, deleteAccount, disconnectStrava, updateProfile, updateTraining } from "./actions";
@@ -37,9 +38,16 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
           <h2 className="mb-4 font-bold">Personal details</h2>
           <form action={updateProfile} className="space-y-4">
             <Field label="Full name" htmlFor="name"><input id="name" name="name" className="input" required minLength={2} maxLength={80} defaultValue={user.name} /></Field>
+            {user.dateOfBirth && <p className="text-sm text-muted">Date of birth: <span className="font-medium text-ink">{fmtDate(user.dateOfBirth)}</span> ({ageOn(user.dateOfBirth)} years). To correct it, contact the club.</p>}
             <div className="grid gap-4 sm:grid-cols-2">
-              <Field label="Phone" htmlFor="phone"><input id="phone" name="phone" type="tel" className="input" maxLength={20} defaultValue={user.phone ?? ""} autoComplete="tel" /></Field>
+              <Field label="Contact number" htmlFor="phone"><input id="phone" name="phone" type="tel" className="input" maxLength={20} defaultValue={user.phone ?? ""} autoComplete="tel" /></Field>
+              <Field label="T-shirt size" htmlFor="tshirtSize"><select id="tshirtSize" name="tshirtSize" className="input" defaultValue={user.tshirtSize ?? ""}><option value="">Not set</option>{TSHIRT_SIZES.map((t) => <option key={t}>{t}</option>)}</select></Field>
+            </div>
+            <Field label="Complete address" htmlFor="address"><textarea id="address" name="address" className="input" rows={3} maxLength={300} defaultValue={user.address ?? ""} autoComplete="street-address" /></Field>
+            <div className="grid gap-4 sm:grid-cols-3">
               <Field label="City" htmlFor="city"><input id="city" name="city" className="input" maxLength={60} defaultValue={user.city ?? ""} /></Field>
+              <Field label="State" htmlFor="state"><select id="state" name="state" className="input" defaultValue={user.state ?? ""}><option value="">Not set</option>{STATES.map((st) => <option key={st}>{st}</option>)}</select></Field>
+              <Field label="Pincode" htmlFor="pincode"><input id="pincode" name="pincode" inputMode="numeric" className="input" maxLength={6} defaultValue={user.pincode ?? ""} /></Field>
             </div>
             <Field label="Emergency contact" htmlFor="emergencyContact" hint="Name and phone. Only club coaches can see this."><input id="emergencyContact" name="emergencyContact" className="input" maxLength={120} defaultValue={user.emergencyContact ?? ""} /></Field>
             <Field label="About you" htmlFor="bio"><textarea id="bio" name="bio" className="input" maxLength={500} defaultValue={user.bio ?? ""} placeholder="Your running goals, favourite distance…" /></Field>

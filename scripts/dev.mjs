@@ -1,5 +1,5 @@
 // `npm run dev`: starts the local Postgres, applies migrations, then runs the Next.js dev server.
-import { spawn, spawnSync } from "node:child_process";
+import { run, runSync } from "./bin.mjs";
 import { DEV_URL, startLocalPostgres } from "./local-db.mjs";
 
 const url = process.env.DATABASE_URL?.startsWith("postgres") ? process.env.DATABASE_URL : DEV_URL;
@@ -11,10 +11,10 @@ if (useLocal) {
   db = await startLocalPostgres();
   console.log(db.started ? "Local Postgres started on port 54329." : "Local Postgres already running.");
 }
-const mig = spawnSync("npx", ["prisma", "migrate", "deploy"], { stdio: "inherit", env });
+const mig = runSync("prisma", ["migrate", "deploy"], { stdio: "inherit", env });
 if (mig.status !== 0) { await db.stop(); process.exit(mig.status ?? 1); }
 
-const next = spawn("npx", ["next", "dev", ...process.argv.slice(2)], { stdio: "inherit", env });
+const next = run("next", ["dev", ...process.argv.slice(2)], { stdio: "inherit", env });
 const shutdown = async (code) => { await db.stop(); process.exit(code ?? 0); };
 next.on("exit", shutdown);
 for (const sig of ["SIGINT", "SIGTERM"]) process.on(sig, () => next.kill(sig));
